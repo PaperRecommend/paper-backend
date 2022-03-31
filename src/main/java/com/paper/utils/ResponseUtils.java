@@ -1,7 +1,6 @@
-package com.paper.utils;
+package com.example.paper.utils;
 
-
-import com.paper.model.vo.ResponseVO;
+import com.example.paper.entity.ResponseVO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
