@@ -1,6 +1,8 @@
-package com.paper.dao;
+package com.example.paper.dao;
 
-import com.paper.entity.Paper;
+import com.example.paper.entity.Paper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.annotations.Query;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.stereotype.Repository;

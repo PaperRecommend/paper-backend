@@ -1,9 +1,10 @@
-package com.paper.service;
+package com.example.paper.service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface PaperService {
 

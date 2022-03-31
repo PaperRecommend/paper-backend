@@ -1,4 +1,4 @@
-package com.paper.entity;
+package com.example.paper.entity;
 
 public class Venue {
     private String raw;

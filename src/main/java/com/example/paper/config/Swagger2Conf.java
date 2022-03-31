@@ -1,4 +1,4 @@
-package com.paper.conf;
+package com.example.paper.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
