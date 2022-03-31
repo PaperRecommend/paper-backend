@@ -1,18 +1,13 @@
-package com.example.paper.service;
+package com.paper.service.impl;
 
 
 import com.alibaba.fastjson.JSONObject;
 
-import com.example.paper.dao.PaperRepository;
-import com.example.paper.entity.Paper;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.index.query.BoolQueryBuilder;
+import com.paper.dao.PaperRepository;
+import com.paper.entity.Paper;
+import com.paper.service.PaperService;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
-import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 
@@ -22,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -32,8 +26,6 @@ public class PaperServiceImpl implements PaperService {
 
     @Autowired
     private PaperRepository paperRepository;
-
-
 
     @Override
     @Cacheable(cacheNames = "queryPaper", unless = "#result==null")

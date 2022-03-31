@@ -1,7 +1,7 @@
-package com.example.paper;
+package com.paper;
 
-import com.example.paper.dao.PaperRepository;
-import com.example.paper.entity.Paper;
+import com.paper.dao.PaperRepository;
+import com.paper.entity.Paper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +14,6 @@ public class SpringDataESPaperRepositoryTest {
 
     @Autowired
     private PaperRepository paperRepository;
-
-
 
     //根据 id 查询
     @Test
