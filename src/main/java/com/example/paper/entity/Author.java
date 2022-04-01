@@ -1,8 +1,6 @@
 package com.example.paper.entity;
 
 public class Author {
-
-
     private String name;
     private String org;
     private Long id;

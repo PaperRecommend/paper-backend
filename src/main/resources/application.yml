@@ -3,11 +3,11 @@ spring:
   application:
     name: paper-backend
   datasource:
-    name: defaultDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/blue?serverTimezone=UTC
-    username: root
-    password: 123456
+    url: jdbc:mysql://121.5.234.218:3306/paper?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+    username: wuminxuan
+    password: Wuminxuan@123
+
   # 应用服务 WEB 访问端口
 server:
   port: 8081
@@ -24,3 +24,5 @@ logging:
       example:
         paper: debug
 
+mybatis:
+  type-aliases-package: com.example.paper.entity
