@@ -100,10 +100,14 @@ public class PaperServiceImpl implements PaperService {
             }
 
             Venue venue=p.getVenue();
-            conferenceCount.put(venue.getRaw(),conferenceCount.getOrDefault(venue.getRaw(),0)+1);
+            if(venue!=null&&venue.getRaw()!=null){
+                conferenceCount.put(venue.getRaw(),conferenceCount.getOrDefault(venue.getRaw(),0)+1);
+            }
 
             String publisher=p.getPublisher();
-            publisherCount.put(publisher,publisherCount.getOrDefault(publisher,0)+1);
+            if(publisher!=null){
+                publisherCount.put(publisher,publisherCount.getOrDefault(publisher,0)+1);
+            }
         }
 
         List<Pair<String,Integer>> termList=transformHash(termCount,SUMMARY_LIMIT);
