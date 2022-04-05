@@ -90,13 +90,17 @@ public class PaperServiceImpl implements PaperService {
         Map<String,Integer> publisherCount=new HashMap<>();
         for(Paper p:wholeList){
             Fos[] foss=p.getFos();
-            for(Fos fos:foss){
-                termCount.put(fos.getName(),termCount.getOrDefault(fos.getName(),0)+1);
+            if(foss!=null&&foss.length!=0){
+                for(Fos fos:foss){
+                    termCount.put(fos.getName(),termCount.getOrDefault(fos.getName(),0)+1);
+                }
             }
 
             Author[] authors=p.getAuthors();
-            for(Author author:authors){
-                authorCount.put(author.getName(),authorCount.getOrDefault(author.getName(),0)+1);
+            if(authors!=null&&authors.length!=0){
+                for(Author author:authors){
+                    authorCount.put(author.getName(),authorCount.getOrDefault(author.getName(),0)+1);
+                }
             }
 
             Venue venue=p.getVenue();
