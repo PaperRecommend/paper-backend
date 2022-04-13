@@ -14,7 +14,7 @@ import java.util.Collection;
 @NoArgsConstructor
 public class UserPO implements UserDetails {
 
-    private int id;
+    private Integer id;
 
     private String name;
 

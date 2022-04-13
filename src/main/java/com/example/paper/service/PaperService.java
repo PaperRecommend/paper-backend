@@ -1,6 +1,6 @@
 package com.example.paper.service;
 
-import com.example.paper.entity.Paper;
+import com.example.paper.entity.paperEntity.Paper;
 import com.example.paper.entity.vo.PaperSummaryVO;
 
 import javax.servlet.http.HttpServletRequest;

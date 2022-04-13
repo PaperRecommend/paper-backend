@@ -1,4 +1,4 @@
-package com.example.paper.entity;
+package com.example.paper.entity.paperEntity;
 
 public class Fos {
     private String name;

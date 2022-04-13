@@ -2,10 +2,10 @@ package com.example.paper.service.impl;
 
 
 import com.example.paper.dao.PaperRepository;
-import com.example.paper.entity.Author;
-import com.example.paper.entity.Fos;
-import com.example.paper.entity.Paper;
-import com.example.paper.entity.Venue;
+import com.example.paper.entity.paperEntity.Author;
+import com.example.paper.entity.paperEntity.Fos;
+import com.example.paper.entity.paperEntity.Paper;
+import com.example.paper.entity.paperEntity.Venue;
 import com.example.paper.entity.vo.PaperSummaryVO;
 import com.example.paper.exception.BadReqException;
 import com.example.paper.service.PaperService;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class PaperServiceImpl implements PaperService {
     private static final int SUMMARY_LIMIT=5;
-    private static final int MAX_RESULT_SIZE=1000;
+    private static final int MAX_RESULT_SIZE=100;
 
     @Autowired
     private PaperRepository paperRepository;
@@ -46,6 +46,8 @@ public class PaperServiceImpl implements PaperService {
     public List<Paper> queryPaper(final String key, final String returnFacets,
                                      int pageNum, int pageSize,HttpServletRequest request,
                                   HttpServletResponse response) {
+
+        long startTime=System.currentTimeMillis();
         Pageable pageable= PageRequest.of(pageNum,pageSize);
         Pageable wholePageable=PageRequest.of(0,MAX_RESULT_SIZE);
         //TODO: 后期通过先到es中查询匹配数量，告知用户总匹配数，然后只显示前n条
@@ -74,6 +76,9 @@ public class PaperServiceImpl implements PaperService {
         else{
             return null;
         }
+        long endTime=System.currentTimeMillis();
+        System.out.println("程序运行时间： "+(endTime-startTime)+"ms");
+        System.out.println("总查询到的条目:"+wholeList.size());
         String qid = UUID.randomUUID().toString().replaceAll("-", "");
         request.getSession().setAttribute(qid,wholeList);
         cookieUtils.set(response,"qid",qid);

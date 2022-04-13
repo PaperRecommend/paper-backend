@@ -1,6 +1,6 @@
 package com.example.paper.controller;
 
-import com.example.paper.entity.Paper;
+import com.example.paper.entity.paperEntity.Paper;
 import com.example.paper.entity.vo.PaperSummaryVO;
 import com.example.paper.service.PaperService;
 import com.example.paper.utils.ResponseUtils;
