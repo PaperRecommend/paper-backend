@@ -1,4 +1,4 @@
-package com.example.paper.entity.userInterestEntity;
+package com.example.paper.entity.userActionEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,9 +15,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@Document(indexName = "user_interest")
+@Document(indexName = "user_action")
 
-public class UserInterest {
+public class UserAction {
     @Id
     @Field(type = FieldType.Integer)
     private Integer id;
@@ -36,7 +36,7 @@ public class UserInterest {
         this.id = id;
     }
 
-    public UserInterest(Integer id) {
+    public UserAction(Integer id) {
         this.id = id;
     }
 

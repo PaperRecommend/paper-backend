@@ -1,24 +1,28 @@
 package com.example.paper.service.impl;
 
 import com.example.paper.config.security.JwtTokenUtils;
-import com.example.paper.dao.UserInterestRepository;
+import com.example.paper.dao.UserActionRepository;
 import com.example.paper.dao.UserRepository;
+import com.example.paper.dao.UserSearchRepository;
 import com.example.paper.entity.po.UserPO;
-import com.example.paper.entity.userInterestEntity.ClickAction;
-import com.example.paper.entity.userInterestEntity.PaperCollection;
-import com.example.paper.entity.userInterestEntity.UserInterest;
+import com.example.paper.entity.userActionEntity.ClickAction;
+import com.example.paper.entity.userActionEntity.PaperCollection;
+import com.example.paper.entity.userActionEntity.UserAction;
+import com.example.paper.entity.userSearchEntity.SearchAction;
+import com.example.paper.entity.userSearchEntity.UserSearch;
 import com.example.paper.entity.vo.ResponseVO;
 import com.example.paper.service.UserService;
 
-import java.util.ArrayList;
-import java.util.Base64;
+import java.util.*;
+
+import com.example.paper.utils.CookieUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -26,7 +30,13 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     @Autowired
-    UserInterestRepository userInterestRepository;
+    UserActionRepository userActionRepository;
+
+    @Autowired
+    UserSearchRepository userSearchRepository;
+
+    @Autowired
+    CookieUtils cookieUtils;
 
     @Override
     public int getUserCount() {
@@ -44,13 +54,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseVO login(String name, String password) {
+    public ResponseVO login(String name, String password, HttpServletRequest request,
+                            HttpServletResponse response) {
         UserPO userPO=userRepository.getByName(name);
 
         if(userPO==null){
             return ResponseVO.buildFailure("用户名不存在");
         }
         if(userPO.getPassword().equals(md5(password))){
+            cookieUtils.set(response,"uid",userPO.getId().toString());
             return ResponseVO.buildSuccess(JwtTokenUtils.generateToken(userPO));
         }
         else{
@@ -70,73 +82,75 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseVO clickAction(Integer uid, Long paperId, String paperTitle) {
-        Optional<UserInterest> userInterestOptional=userInterestRepository.findById(uid.longValue());
-        UserInterest userInterest;
+        Optional<UserAction> userInterestOptional= userActionRepository.findById(uid.longValue());
+        UserAction userAction;
         if(userInterestOptional.isPresent()){
-            userInterest=userInterestOptional.get();
-            List<ClickAction> clickActions=userInterest.getClickActions();
+            userAction =userInterestOptional.get();
+            List<ClickAction> clickActions= userAction.getClickActions();
 
             boolean hasClickedBefore=false;
             for(ClickAction clickAction:clickActions){
                 if(clickAction.getPaperId().equals(paperId)){
                     clickAction.setClickCount(clickAction.getClickCount()+1);
+                    //更新最后一次click时间
+                    clickAction.setLastTime(new Date().getTime());
                     hasClickedBefore=true;
                     break;
                 }
             }
             if(!hasClickedBefore){
-                clickActions.add(new ClickAction(paperId,paperTitle,1));
+                clickActions.add(new ClickAction(paperId,paperTitle,1,new Date().getTime()));
             }
         }
         else{
-            userInterest=new UserInterest(uid);
+            userAction =new UserAction(uid);
             List<ClickAction> clickActions=new ArrayList<>();
-            clickActions.add(new ClickAction(paperId,paperTitle,1));
+            clickActions.add(new ClickAction(paperId,paperTitle,1,new Date().getTime()));
             List<PaperCollection> paperCollections=new ArrayList<>();
-            userInterest.setPaperCollections(paperCollections);
-            userInterest.setClickActions(clickActions);
+            userAction.setPaperCollections(paperCollections);
+            userAction.setClickActions(clickActions);
         }
-        userInterestRepository.save(userInterest);
+        userActionRepository.save(userAction);
         return ResponseVO.buildSuccess("点击记录成功");
     }
 
     @Override
     public ResponseVO collectPaper(Integer uid, Long paperId, String paperTitle) {
-        Optional<UserInterest> userInterestOptional=userInterestRepository.findById(uid.longValue());
-        UserInterest userInterest;
+        Optional<UserAction> userInterestOptional= userActionRepository.findById(uid.longValue());
+        UserAction userAction;
         if(userInterestOptional.isPresent()){
-            userInterest=userInterestOptional.get();
-            List<PaperCollection> paperCollections=userInterest.getPaperCollections();
+            userAction =userInterestOptional.get();
+            List<PaperCollection> paperCollections= userAction.getPaperCollections();
 
             for(PaperCollection paperCollection:paperCollections){
                 if(paperCollection.getPaperId().equals(paperId)) {
                     return ResponseVO.buildFailure("已经收藏过了");
                 }
             }
-            paperCollections.add(new PaperCollection(paperId,paperTitle));
+            paperCollections.add(new PaperCollection(paperId,paperTitle,new Date().getTime()));
         }
         else{
-            userInterest=new UserInterest(uid);
+            userAction =new UserAction(uid);
             List<PaperCollection> paperCollections=new ArrayList<>();
-            paperCollections.add(new PaperCollection(paperId,paperTitle));
+            paperCollections.add(new PaperCollection(paperId,paperTitle,new Date().getTime()));
             List<ClickAction> clickActions=new ArrayList<>();
-            userInterest.setClickActions(clickActions);
-            userInterest.setPaperCollections(paperCollections);
+            userAction.setClickActions(clickActions);
+            userAction.setPaperCollections(paperCollections);
         }
-        userInterestRepository.save(userInterest);
+        userActionRepository.save(userAction);
         return ResponseVO.buildSuccess("收藏成功");
     }
 
     @Override
     public ResponseVO cancelCollection(Integer uid, Long paperId) {
-        Optional<UserInterest> userInterestOptional=userInterestRepository.findById(uid.longValue());
+        Optional<UserAction> userInterestOptional= userActionRepository.findById(uid.longValue());
         if(userInterestOptional.isPresent()){
-            UserInterest userInterest=userInterestOptional.get();
-            if(userInterest.getPaperCollections()==null){
+            UserAction userAction =userInterestOptional.get();
+            if(userAction.getPaperCollections()==null){
                 return ResponseVO.buildFailure("用户未收藏");
             }
             boolean hasDeleted=false;
-            List<PaperCollection> paperCollections=userInterest.getPaperCollections();
+            List<PaperCollection> paperCollections= userAction.getPaperCollections();
             for(PaperCollection paperCollection:paperCollections){
                 if(paperCollection.getPaperId().equals(paperId)){
                     paperCollections.remove(paperCollection);
@@ -144,17 +158,34 @@ public class UserServiceImpl implements UserService {
                     break;
                 }
             }
-            if(paperCollections.isEmpty()&&userInterest.getClickActions().isEmpty()){
-                userInterestRepository.deleteById(uid.longValue());
+            if(paperCollections.isEmpty()&& userAction.getClickActions().isEmpty()){
+                userActionRepository.deleteById(uid.longValue());
             }
             else{
-                userInterestRepository.save(userInterest);
+                userActionRepository.save(userAction);
             }
             return hasDeleted?ResponseVO.buildSuccess("取消收藏成功"):ResponseVO.buildFailure("用户未收藏");
         }
         else {
             return ResponseVO.buildFailure("用户未收藏");
         }
+    }
+
+    @Override
+    public void recordSearch(Integer uid, String searchContent) {
+        Optional<UserSearch> userSearchOptional=userSearchRepository.findById(uid.longValue());
+        UserSearch userSearch;
+        if(userSearchOptional.isPresent()){
+            userSearch=userSearchOptional.get();
+            userSearch.getSearchActions().add(new SearchAction(searchContent,new Date().getTime()));
+        }
+        else{
+            userSearch=new UserSearch(uid);
+            List<SearchAction> searchActions=new ArrayList<>();
+            searchActions.add(new SearchAction(searchContent,new Date().getTime()));
+            userSearch.setSearchActions(searchActions);
+        }
+        userSearchRepository.save(userSearch);
     }
 
 

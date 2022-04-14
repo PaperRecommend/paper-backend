@@ -3,6 +3,9 @@ package com.example.paper.service;
 import com.example.paper.entity.po.UserPO;
 import com.example.paper.entity.vo.ResponseVO;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 public interface UserService {
     int getUserCount();
 
@@ -16,7 +19,8 @@ public interface UserService {
      * 登录
      * @return 如果成功，msg为token； 如果失败，msg为错误信息
      */
-    ResponseVO login(String name, String password);
+    ResponseVO login(String name, String password, HttpServletRequest request,
+                     HttpServletResponse response);
 
 
     UserPO getUserById(int id);
@@ -28,5 +32,7 @@ public interface UserService {
     ResponseVO collectPaper(Integer uid,Long paperId,String paperTitle);
 
     ResponseVO cancelCollection(Integer uid,Long paperId);
+
+    void recordSearch(Integer uid,String searchContent);
 
 }
