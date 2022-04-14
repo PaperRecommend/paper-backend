@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.net.UnknownHostException;
 import java.util.List;
 
 @RestController
@@ -26,31 +27,31 @@ public class StatisticController {
     private StatisticService statisticService;
 
     /**
-     *
      * @return
      */
     @GetMapping("/author/list")
-    public ResponseEntity<List<StaAuthorVO>> statisticAuthor() {
-        return ResponseUtils.success(statisticService.statisticAuthor());
+    public ResponseEntity<List<StaAuthorVO>> statisticAuthor(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                                             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        return ResponseUtils.success(statisticService.statisticAuthor(pageNum,pageSize));
     }
 
 
     /**
-     *
      * @return
      */
     @GetMapping("/conference/list")
-    public ResponseEntity<List<StaConferenceVO>> statisticConference() {
-        return ResponseUtils.success(statisticService.statisticConference());
+    public ResponseEntity<List<StaConferenceVO>> statisticConference(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        return ResponseUtils.success(statisticService.statisticConference(pageNum,pageSize));
     }
 
     /**
-     *
      * @return
      */
     @GetMapping("/field/list")
-    public ResponseEntity<List<StaFieldVO>> statisticField() {
-        return ResponseUtils.success(statisticService.statisticField());
+    public ResponseEntity<List<StaFieldVO>> statisticField(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        return ResponseUtils.success(statisticService.statisticField(pageNum,pageSize));
     }
 
 }
