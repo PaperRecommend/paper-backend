@@ -124,8 +124,8 @@ public class PaperServiceImpl implements PaperService {
         List<Paper> refineList=paperRefine(wholeList,refinements);
 
         List<Paper> paperList=pageHelper.of(refineList,pageSize,pageNum);
-        System.out.println("refine 分页前大小"+refineList.size());
-        System.out.println("refine 分页后大小"+paperList.size());
+//        System.out.println("refine 分页前大小"+refineList.size());
+//        System.out.println("refine 分页后大小"+paperList.size());
         return paperList;
     }
 

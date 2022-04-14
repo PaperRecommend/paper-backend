@@ -65,6 +65,7 @@ public class PaperController {
     @GetMapping(path = "/paper/summary")
     public ResponseEntity<PaperSummaryVO> getPaperSummary(@CookieValue(name = "qid") String qid,
                                                           HttpServletRequest request) {
+        System.out.println(qid);
         return ResponseUtils.success(paperService.papersSummary(qid, request));
     }
 //
