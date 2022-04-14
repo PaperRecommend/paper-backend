@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 @Api(tags="用户模块接口")
 @RestController
 @RequestMapping("/user")
@@ -37,8 +40,9 @@ public class UserController {
 
     @ApiOperation("登录")
     @PostMapping("/login")
-    public ResponseEntity<ResponseVO> login(@RequestBody UserLoginVO user){
-        ResponseVO res=userService.login(user.getName(),user.getPassword());
+    public ResponseEntity<ResponseVO> login(@RequestBody UserLoginVO user, HttpServletRequest request,
+                                            HttpServletResponse response){
+        ResponseVO res=userService.login(user.getName(),user.getPassword(),request,response);
         if(res.isSuccess()){
             return ResponseUtils.success(res);
         }

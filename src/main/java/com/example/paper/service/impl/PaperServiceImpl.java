@@ -9,6 +9,7 @@ import com.example.paper.entity.paperEntity.Venue;
 import com.example.paper.entity.vo.PaperSummaryVO;
 import com.example.paper.exception.BadReqException;
 import com.example.paper.service.PaperService;
+import com.example.paper.service.UserService;
 import com.example.paper.utils.CookieUtils;
 import com.example.paper.utils.PageHelper;
 import com.example.paper.utils.Pair;
@@ -36,6 +37,9 @@ public class PaperServiceImpl implements PaperService {
     private PaperRepository paperRepository;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private CookieUtils cookieUtils;
 
     @Autowired
@@ -46,8 +50,9 @@ public class PaperServiceImpl implements PaperService {
     public List<Paper> queryPaper(final String key, final String returnFacets,
                                      int pageNum, int pageSize,HttpServletRequest request,
                                   HttpServletResponse response) {
+        Integer uid=Integer.valueOf(cookieUtils.getValue(request,"uid"));
+        userService.recordSearch(uid,key);
 
-        long startTime=System.currentTimeMillis();
         Pageable pageable= PageRequest.of(pageNum,pageSize);
         Pageable wholePageable=PageRequest.of(0,MAX_RESULT_SIZE);
         //TODO: 后期通过先到es中查询匹配数量，告知用户总匹配数，然后只显示前n条
@@ -76,9 +81,6 @@ public class PaperServiceImpl implements PaperService {
         else{
             return null;
         }
-        long endTime=System.currentTimeMillis();
-        System.out.println("程序运行时间： "+(endTime-startTime)+"ms");
-        System.out.println("总查询到的条目:"+wholeList.size());
         String qid = UUID.randomUUID().toString().replaceAll("-", "");
         request.getSession().setAttribute(qid,wholeList);
         cookieUtils.set(response,"qid",qid);

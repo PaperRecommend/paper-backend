@@ -1,4 +1,4 @@
-package com.example.paper.entity.userInterestEntity;
+package com.example.paper.entity.userSearchEntity;
 
 
 import lombok.AllArgsConstructor;
@@ -16,16 +16,16 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@Document(indexName = "user_interest")
-public class UserInterest {
+@Document(indexName = "user_search")
+public class UserSearch {
     @Id
     @Field(type = FieldType.Integer)
     private Integer id;
 
     @Field(type = FieldType.Text)
-    private List<PaperInterest> paperInterests;
+    private List<SearchAction> searchActions;
 
-    public UserInterest(Integer id) {
+    public UserSearch(Integer id) {
         this.id = id;
     }
 
@@ -37,11 +37,11 @@ public class UserInterest {
         this.id = id;
     }
 
-    public List<PaperInterest> getPaperInterests() {
-        return paperInterests;
+    public List<SearchAction> getSearchActions() {
+        return searchActions;
     }
 
-    public void setPaperInterests(List<PaperInterest> paperInterests) {
-        this.paperInterests = paperInterests;
+    public void setSearchActions(List<SearchAction> searchActions) {
+        this.searchActions = searchActions;
     }
 }
