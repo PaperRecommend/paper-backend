@@ -1,6 +1,6 @@
 package com.example.paper.dao;
 
-import com.example.paper.entity.Paper;
+import com.example.paper.entity.paperEntity.Paper;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.annotations.Query;
@@ -18,7 +18,5 @@ public interface PaperRepository extends ElasticsearchRepository<Paper, Long>{
 
     @Query("{\"match\":{\"?1\":\"?0\"}}")
     List<Paper> findByKey(String key, String facets, Pageable pageable);
-
-
 
 }

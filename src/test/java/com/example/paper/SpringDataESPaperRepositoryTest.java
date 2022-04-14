@@ -1,7 +1,7 @@
 package com.example.paper;
 
 import com.example.paper.dao.PaperRepository;
-import com.example.paper.entity.Paper;
+import com.example.paper.entity.paperEntity.Paper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -21,6 +21,12 @@ public interface UserService {
 
     UserPO getUserById(int id);
 
+    ResponseVO getIdByUsername(String username);
 
+    ResponseVO clickAction(Integer uid,Long paperId,String paperTitle);
+
+    ResponseVO collectPaper(Integer uid,Long paperId,String paperTitle);
+
+    ResponseVO cancelCollection(Integer uid,Long paperId);
 
 }

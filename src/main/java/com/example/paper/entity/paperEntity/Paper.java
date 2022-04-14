@@ -1,4 +1,4 @@
-package com.example.paper.entity;
+package com.example.paper.entity.paperEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
