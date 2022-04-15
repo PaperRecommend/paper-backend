@@ -34,4 +34,19 @@ public class UserRecommendController {
         return ResponseUtils.success(userRecommendService.interestAllUpdate());
     }
 
+    @ApiOperation("/重新计算单个用户与其他用户的相似度")
+    @PostMapping("/similarity/single-update")
+    public ResponseEntity<ResponseVO> similaritySingleUpdate(@RequestParam("uid")Integer uid){
+        return ResponseUtils.success(userRecommendService.singleUserSimilarity(uid));
+    }
+
+    @ApiOperation("/重新计算所有用户与其他用户相似度")
+    @PostMapping("/similarity/all-update")
+    public ResponseEntity<ResponseVO> similarityAllUpdate(){
+        return ResponseUtils.success(userRecommendService.allUserSimilarity());
+    }
+
+
+
+
 }
