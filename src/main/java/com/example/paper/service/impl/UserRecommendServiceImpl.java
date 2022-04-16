@@ -257,6 +257,14 @@ public class UserRecommendServiceImpl implements UserRecommendService {
                 }
             }
             paperRecommendList.sort(Comparator.comparing(PaperRecommend::getWeight).reversed());
+            int zero_idx=0;
+            for(int i=0;i<paperRecommendList.size();i++){
+                if(paperRecommendList.get(i).getWeight().equals(0.0)){
+                    zero_idx=i;
+                    break;
+                }
+            }
+            paperRecommendList=paperRecommendList.subList(0,zero_idx);
             UserRecommend userRecommend=new UserRecommend(uid,paperRecommendList);
             userRecommendRepository.save(userRecommend);
             return ResponseVO.buildSuccess("推荐列表更新成功");
@@ -273,6 +281,19 @@ public class UserRecommendServiceImpl implements UserRecommendService {
             recommendSingleUpdate(uid);
         }
         return ResponseVO.buildSuccess("所有用户推荐列表更新成功");
+    }
+
+    @Override
+    public List<PaperRecommend> getUserRecommend(Integer uid, int n) {
+        Optional<UserRecommend> userRecommendOptional=userRecommendRepository.findById(uid.longValue());
+        if(userRecommendOptional.isPresent()){
+            List<PaperRecommend> paperRecommends=userRecommendOptional.get().getPaperRecommendList();
+            if(paperRecommends.size()>n){
+                paperRecommends=paperRecommends.subList(0,n);
+            }
+            return paperRecommends;
+        }
+        return new ArrayList<>();
     }
 
 
