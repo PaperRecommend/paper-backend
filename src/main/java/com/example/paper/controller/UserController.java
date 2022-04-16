@@ -1,5 +1,7 @@
 package com.example.paper.controller;
 
+import com.example.paper.entity.userActionEntity.PaperCollection;
+import com.example.paper.entity.userActionEntity.UserAction;
 import com.example.paper.entity.vo.ResponseVO;
 import com.example.paper.entity.vo.UserLoginVO;
 import com.example.paper.service.UserService;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @Api(tags="用户模块接口")
 @RestController
@@ -53,9 +56,9 @@ public class UserController {
 
     @ApiOperation("获取用户id")
     @GetMapping("/uid")
-    public ResponseEntity<ResponseVO> uid(@RequestParam(name="username")String username){
-        ResponseVO responseVO=userService.getIdByUsername(username);
-        return responseVO.isSuccess()?ResponseUtils.success(responseVO):ResponseUtils.failure(responseVO);
+    public ResponseEntity<Integer> uid(@RequestParam(name="username")String username){
+        Integer uid=userService.getIdByUsername(username);
+        return uid==-1?ResponseUtils.failure(-1):ResponseUtils.success(uid);
     }
 
 
@@ -63,18 +66,16 @@ public class UserController {
     @ApiOperation("点击事件保存的论文id和论文title")
     @PostMapping("/click")
     public ResponseEntity<ResponseVO> clickAction(@RequestParam(name="uid")Integer uid,
-                                                  @RequestParam(name="paperId")Long paperId,
-                                                  @RequestParam(name="paperTitle")String paperTitle){
+                                                  @RequestParam(name="paperId")Long paperId){
 
-        return ResponseUtils.success(userService.clickAction(uid,paperId,paperTitle));
+        return ResponseUtils.success(userService.clickAction(uid,paperId));
     }
 
     @ApiOperation("收藏事件")
     @PostMapping("/collection")
     public ResponseEntity<ResponseVO> collection(@RequestParam(name="uid")Integer uid,
-                                                 @RequestParam(name="paperId")Long paperId,
-                                                 @RequestParam(name="paperTitle")String paperTitle){
-        ResponseVO responseVO=userService.collectPaper(uid,paperId,paperTitle);
+                                                 @RequestParam(name="paperId")Long paperId){
+        ResponseVO responseVO=userService.collectPaper(uid,paperId);
         return responseVO.isSuccess()?ResponseUtils.success(responseVO):ResponseUtils.failure(responseVO);
     }
 
@@ -86,4 +87,10 @@ public class UserController {
         return responseVO.isSuccess()?ResponseUtils.success(responseVO):ResponseUtils.failure(responseVO);
     }
 
+    @ApiOperation("获取用户收藏的paper")
+    @GetMapping("/get-user-collection")
+    public ResponseEntity<List<PaperCollection>> getUserCollection(@RequestParam(name="uid")Integer uid){
+        List<PaperCollection> paperCollections=userService.getUserCollection(uid);
+        return paperCollections.isEmpty()?ResponseUtils.failure(paperCollections):ResponseUtils.success(paperCollections);
+    }
 }

@@ -6,4 +6,10 @@ public interface UserRecommendService {
     ResponseVO interestSingleUpdate(Integer uid);
 
     ResponseVO interestAllUpdate();
+
+    ResponseVO singleUserSimilarity(Integer uid);
+
+    ResponseVO allUserSimilarity();
+
+    ResponseVO recommendSingleUpdate(Integer uid);
 }

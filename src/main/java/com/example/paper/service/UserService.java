@@ -1,10 +1,12 @@
 package com.example.paper.service;
 
 import com.example.paper.entity.po.UserPO;
+import com.example.paper.entity.userActionEntity.PaperCollection;
 import com.example.paper.entity.vo.ResponseVO;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface UserService {
     int getUserCount();
@@ -25,13 +27,15 @@ public interface UserService {
 
     UserPO getUserById(int id);
 
-    ResponseVO getIdByUsername(String username);
+    Integer getIdByUsername(String username);
 
-    ResponseVO clickAction(Integer uid,Long paperId,String paperTitle);
+    ResponseVO clickAction(Integer uid,Long paperId);
 
-    ResponseVO collectPaper(Integer uid,Long paperId,String paperTitle);
+    ResponseVO collectPaper(Integer uid,Long paperId);
 
     ResponseVO cancelCollection(Integer uid,Long paperId);
+
+    List<PaperCollection> getUserCollection(Integer uid);
 
     void recordSearch(Integer uid,String searchContent);
 
