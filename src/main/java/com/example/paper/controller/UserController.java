@@ -1,5 +1,6 @@
 package com.example.paper.controller;
 
+import com.example.paper.entity.paperEntity.Paper;
 import com.example.paper.entity.userActionEntity.PaperCollection;
 import com.example.paper.entity.userActionEntity.UserAction;
 import com.example.paper.entity.vo.ResponseVO;
@@ -89,8 +90,8 @@ public class UserController {
 
     @ApiOperation("获取用户收藏的paper")
     @GetMapping("/get-user-collection")
-    public ResponseEntity<List<PaperCollection>> getUserCollection(@RequestParam(name="uid")Integer uid){
-        List<PaperCollection> paperCollections=userService.getUserCollection(uid);
-        return paperCollections.isEmpty()?ResponseUtils.failure(paperCollections):ResponseUtils.success(paperCollections);
+    public ResponseEntity<List<Paper>> getUserCollection(@RequestParam(name="uid")Integer uid){
+        List<Paper> papers=userService.getUserCollection(uid);
+        return papers.isEmpty()?ResponseUtils.failure(papers):ResponseUtils.success(papers);
     }
 }

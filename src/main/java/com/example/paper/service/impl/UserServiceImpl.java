@@ -1,9 +1,11 @@
 package com.example.paper.service.impl;
 
 import com.example.paper.config.security.JwtTokenUtils;
+import com.example.paper.dao.PaperRepository;
 import com.example.paper.dao.UserActionRepository;
 import com.example.paper.dao.UserRepository;
 import com.example.paper.dao.UserSearchRepository;
+import com.example.paper.entity.paperEntity.Paper;
 import com.example.paper.entity.po.UserPO;
 import com.example.paper.entity.userActionEntity.ClickAction;
 import com.example.paper.entity.userActionEntity.PaperCollection;
@@ -38,6 +40,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     CookieUtils cookieUtils;
+
+    @Autowired
+    PaperRepository paperRepository;
 
     @Override
     public int getUserCount() {
@@ -173,11 +178,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<PaperCollection> getUserCollection(Integer uid) {
+    public List<Paper> getUserCollection(Integer uid) {
         Optional<UserAction> userActionOptional=userActionRepository.findById(uid.longValue());
         if(userActionOptional.isPresent()){
             UserAction userAction=userActionOptional.get();
-            return userAction.getPaperCollections();
+            List<Paper> papers=new ArrayList<>();
+            List<PaperCollection> paperCollections=userAction.getPaperCollections();
+            for(PaperCollection paperCollection:paperCollections){
+                papers.add(paperRepository.findById(paperCollection.getPaperId().longValue()).get());
+            }
+            return papers;
         }
         else{
             return new ArrayList<>();

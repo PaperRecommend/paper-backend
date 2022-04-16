@@ -12,4 +12,6 @@ public interface UserRecommendService {
     ResponseVO allUserSimilarity();
 
     ResponseVO recommendSingleUpdate(Integer uid);
+
+    ResponseVO recommendAllUpdate();
 }

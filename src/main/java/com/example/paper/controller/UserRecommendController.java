@@ -53,6 +53,12 @@ public class UserRecommendController {
         return responseVO.isSuccess()?ResponseUtils.success(responseVO):ResponseUtils.failure(responseVO);
     }
 
+    @ApiOperation("/计算所有用户的推荐论文")
+    @PostMapping("/paper-recommend/all-update")
+    public ResponseEntity<ResponseVO> recommendAllUpdate(){
+        ResponseVO responseVO=userRecommendService.recommendAllUpdate();
+        return responseVO.isSuccess()?ResponseUtils.success(responseVO):ResponseUtils.failure(responseVO);
+    }
 
 
 
