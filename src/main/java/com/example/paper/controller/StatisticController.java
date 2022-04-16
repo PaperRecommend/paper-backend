@@ -54,4 +54,36 @@ public class StatisticController {
         return ResponseUtils.success(statisticService.statisticField(pageNum,pageSize));
     }
 
+    /**
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/author/detail")
+    public ResponseEntity<StaAuthorVO> getAuthorDetail(@RequestParam(name = "id") long id) {
+        return ResponseUtils.success(statisticService.getAuthorDetail(id));
+    }
+
+    /**
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/conference/detail")
+    public ResponseEntity<StaConferenceVO> getConferenceDetail(@RequestParam(name = "id") long id) {
+        return ResponseUtils.success(statisticService.getConferenceDetail(id));
+    }
+
+    /**
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/field/detail")
+    public ResponseEntity<StaFieldVO> getFieldDetail(@RequestParam(name = "id") long id) {
+        return ResponseUtils.success(statisticService.getFieldDetail(id));
+    }
+
+
+
 }

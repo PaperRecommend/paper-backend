@@ -2,6 +2,7 @@ package com.example.paper.entity.vo;
 
 
 
+import com.example.paper.entity.paperEntity.Paper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,11 @@ public class StaAuthorVO {
 
     @Field(type = FieldType.Text)
     private Long[] papers;
+
+    @Field(type = FieldType.Text)
+    private List<Paper> paperDetail;
+
+
 
     @Field(type = FieldType.Text)
     private List<Object> coauthors;
@@ -151,5 +157,13 @@ public class StaAuthorVO {
 
     public void setCited_rate(double cited_rate) {
         this.cited_rate = cited_rate;
+    }
+
+    public List<Paper> getPaperDetail() {
+        return paperDetail;
+    }
+
+    public void setPaperDetail(List<Paper> paperDetail) {
+        this.paperDetail = paperDetail;
     }
 }

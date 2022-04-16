@@ -15,4 +15,10 @@ public interface StatisticService {
 
     List<StaConferenceVO> statisticConference(int pageNum, int pageSize);
 
+    StaAuthorVO getAuthorDetail(long id);
+
+    StaConferenceVO getConferenceDetail(long id);
+
+    StaFieldVO getFieldDetail(long id);
+
 }
