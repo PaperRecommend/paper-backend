@@ -191,9 +191,6 @@ public class UserRecommendServiceImpl implements UserRecommendService {
 
     @Override
     public ResponseVO recommendSingleUpdate(Integer uid) {
-        interestSingleUpdate(uid);
-        singleUserSimilarity(uid);
-
         Optional<UserSimilarity> userSimilarityOptional=userSimilarityRepository.findById(uid.longValue());
         if(userSimilarityOptional.isPresent()){
             UserSimilarity userSimilarity=userSimilarityOptional.get();
@@ -269,6 +266,14 @@ public class UserRecommendServiceImpl implements UserRecommendService {
         }
     }
 
+    @Override
+    public ResponseVO recommendAllUpdate() {
+        List<Integer> uid_list=userRepository.getAllUserId();
+        for(Integer uid:uid_list){
+            recommendSingleUpdate(uid);
+        }
+        return ResponseVO.buildSuccess("所有用户推荐列表更新成功");
+    }
 
 
     //遍历计算所有其他用户和当前用户的相似度

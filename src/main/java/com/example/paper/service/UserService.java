@@ -1,5 +1,6 @@
 package com.example.paper.service;
 
+import com.example.paper.entity.paperEntity.Paper;
 import com.example.paper.entity.po.UserPO;
 import com.example.paper.entity.userActionEntity.PaperCollection;
 import com.example.paper.entity.vo.ResponseVO;
@@ -35,7 +36,7 @@ public interface UserService {
 
     ResponseVO cancelCollection(Integer uid,Long paperId);
 
-    List<PaperCollection> getUserCollection(Integer uid);
+    List<Paper> getUserCollection(Integer uid);
 
     void recordSearch(Integer uid,String searchContent);
 
