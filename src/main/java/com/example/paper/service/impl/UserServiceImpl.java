@@ -16,6 +16,7 @@ import com.example.paper.service.UserService;
 import java.util.*;
 
 import com.example.paper.utils.CookieUtils;
+import com.example.paper.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -75,13 +76,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseVO getIdByUsername(String username) {
+    public Integer getIdByUsername(String username) {
         UserPO userPO=userRepository.getByName(username);
-        return userPO==null?ResponseVO.buildFailure("用户不存在"):ResponseVO.buildSuccess(String.valueOf(userPO.getId()));
+        return userPO==null?-1:userPO.getId();
     }
 
     @Override
-    public ResponseVO clickAction(Integer uid, Long paperId, String paperTitle) {
+    public ResponseVO clickAction(Integer uid, Long paperId) {
         Optional<UserAction> userInterestOptional= userActionRepository.findById(uid.longValue());
         UserAction userAction;
         if(userInterestOptional.isPresent()){
@@ -99,13 +100,13 @@ public class UserServiceImpl implements UserService {
                 }
             }
             if(!hasClickedBefore){
-                clickActions.add(new ClickAction(paperId,paperTitle,1,new Date().getTime()));
+                clickActions.add(new ClickAction(paperId,1,new Date().getTime()));
             }
         }
         else{
             userAction =new UserAction(uid);
             List<ClickAction> clickActions=new ArrayList<>();
-            clickActions.add(new ClickAction(paperId,paperTitle,1,new Date().getTime()));
+            clickActions.add(new ClickAction(paperId,1,new Date().getTime()));
             List<PaperCollection> paperCollections=new ArrayList<>();
             userAction.setPaperCollections(paperCollections);
             userAction.setClickActions(clickActions);
@@ -115,7 +116,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseVO collectPaper(Integer uid, Long paperId, String paperTitle) {
+    public ResponseVO collectPaper(Integer uid, Long paperId) {
         Optional<UserAction> userInterestOptional= userActionRepository.findById(uid.longValue());
         UserAction userAction;
         if(userInterestOptional.isPresent()){
@@ -127,12 +128,12 @@ public class UserServiceImpl implements UserService {
                     return ResponseVO.buildFailure("已经收藏过了");
                 }
             }
-            paperCollections.add(new PaperCollection(paperId,paperTitle,new Date().getTime()));
+            paperCollections.add(new PaperCollection(paperId,new Date().getTime()));
         }
         else{
             userAction =new UserAction(uid);
             List<PaperCollection> paperCollections=new ArrayList<>();
-            paperCollections.add(new PaperCollection(paperId,paperTitle,new Date().getTime()));
+            paperCollections.add(new PaperCollection(paperId,new Date().getTime()));
             List<ClickAction> clickActions=new ArrayList<>();
             userAction.setClickActions(clickActions);
             userAction.setPaperCollections(paperCollections);
@@ -168,6 +169,18 @@ public class UserServiceImpl implements UserService {
         }
         else {
             return ResponseVO.buildFailure("用户未收藏");
+        }
+    }
+
+    @Override
+    public List<PaperCollection> getUserCollection(Integer uid) {
+        Optional<UserAction> userActionOptional=userActionRepository.findById(uid.longValue());
+        if(userActionOptional.isPresent()){
+            UserAction userAction=userActionOptional.get();
+            return userAction.getPaperCollections();
+        }
+        else{
+            return new ArrayList<>();
         }
     }
 

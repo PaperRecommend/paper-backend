@@ -1,14 +1,13 @@
 package com.example.paper.service.impl;
 
-import com.example.paper.dao.UserActionRepository;
-import com.example.paper.dao.UserInterestRepository;
-import com.example.paper.dao.UserRepository;
-import com.example.paper.dao.UserSimilarityRepository;
+import com.example.paper.dao.*;
 import com.example.paper.entity.userActionEntity.ClickAction;
 import com.example.paper.entity.userActionEntity.PaperCollection;
 import com.example.paper.entity.userActionEntity.UserAction;
 import com.example.paper.entity.userInterestEntity.PaperInterest;
 import com.example.paper.entity.userInterestEntity.UserInterest;
+import com.example.paper.entity.userRecommendEntity.PaperRecommend;
+import com.example.paper.entity.userRecommendEntity.UserRecommend;
 import com.example.paper.entity.userSimilarityEntity.Similarity;
 import com.example.paper.entity.userSimilarityEntity.UserSimilarity;
 import com.example.paper.entity.vo.ResponseVO;
@@ -29,6 +28,7 @@ import java.util.*;
 public class UserRecommendServiceImpl implements UserRecommendService {
 
     private static final int MILLS_DAY=1000*60*60*24;
+    private static final int TOP_SIMILAR=10;
 
     @Autowired
     UserRepository userRepository;
@@ -38,6 +38,8 @@ public class UserRecommendServiceImpl implements UserRecommendService {
     UserInterestRepository userInterestRepository;
     @Autowired
     UserSimilarityRepository userSimilarityRepository;
+    @Autowired
+    UserRecommendRepository userRecommendRepository;
 
     @Override
     public ResponseVO interestSingleUpdate(Integer uid) {
@@ -61,20 +63,20 @@ public class UserRecommendServiceImpl implements UserRecommendService {
                 ClickAction current_click=clickActions.get(c_index);
                 PaperCollection current_paper=paperCollections.get(p_index);
                 if(current_click.getPaperId().equals(current_paper.getPaperId())){
-                    PaperInterest paperInterest=new PaperInterest(current_click.getPaperId(),current_click.getPaperTitle(),
+                    PaperInterest paperInterest=new PaperInterest(current_click.getPaperId(),
                             countInterest(current_click,current_paper));
                     c_index++;
                     p_index++;
                     paperInterests.add(paperInterest);
                 }
                 else if(current_click.getPaperId()<current_paper.getPaperId()){
-                    PaperInterest paperInterest=new PaperInterest(current_click.getPaperId(),current_click.getPaperTitle(),
+                    PaperInterest paperInterest=new PaperInterest(current_click.getPaperId(),
                             countInterest(current_click));
                     c_index++;
                     paperInterests.add(paperInterest);
                 }
                 else{
-                    PaperInterest paperInterest=new PaperInterest(current_paper.getPaperId(),current_paper.getPaperTitle(),
+                    PaperInterest paperInterest=new PaperInterest(current_paper.getPaperId(),
                             countInterest(current_paper));
                     p_index++;
                     paperInterests.add(paperInterest);
@@ -83,7 +85,7 @@ public class UserRecommendServiceImpl implements UserRecommendService {
 
             while(c_index<c_size){
                 ClickAction current_click=clickActions.get(c_index);
-                PaperInterest paperInterest=new PaperInterest(current_click.getPaperId(),current_click.getPaperTitle(),
+                PaperInterest paperInterest=new PaperInterest(current_click.getPaperId(),
                         countInterest(current_click));
                 c_index++;
                 paperInterests.add(paperInterest);
@@ -91,7 +93,7 @@ public class UserRecommendServiceImpl implements UserRecommendService {
 
             while(p_index<p_size){
                 PaperCollection current_paper=paperCollections.get(p_index);
-                PaperInterest paperInterest=new PaperInterest(current_paper.getPaperId(),current_paper.getPaperTitle(),
+                PaperInterest paperInterest=new PaperInterest(current_paper.getPaperId(),
                         countInterest(current_paper));
                 p_index++;
                 paperInterests.add(paperInterest);
@@ -118,7 +120,6 @@ public class UserRecommendServiceImpl implements UserRecommendService {
     @Override
     @Scheduled(cron = "0 0 0/2 * * ?")
     public ResponseVO interestAllUpdate() {
-        System.out.println("更新全部用户"+new Date().toString());
         List<Integer> uid_list=userRepository.getAllUserId();
         if(uid_list==null){
             return ResponseVO.buildFailure("系统中暂无用户");
@@ -157,7 +158,9 @@ public class UserRecommendServiceImpl implements UserRecommendService {
         }
     }
 
+    //每两小时更新一次用户相似度
     @Override
+    @Scheduled(cron = "0 0 0/2 * * ?")
     public ResponseVO allUserSimilarity() {
         List<Integer> uid_list=userRepository.getAllUserId();
         Iterator<UserInterest> userInterestIterator=userInterestRepository.findAll().iterator();
@@ -185,6 +188,88 @@ public class UserRecommendServiceImpl implements UserRecommendService {
         }
         return ResponseVO.buildSuccess("成功更新所有用户的相似度");
     }
+
+    @Override
+    public ResponseVO recommendSingleUpdate(Integer uid) {
+        interestSingleUpdate(uid);
+        singleUserSimilarity(uid);
+
+        Optional<UserSimilarity> userSimilarityOptional=userSimilarityRepository.findById(uid.longValue());
+        if(userSimilarityOptional.isPresent()){
+            UserSimilarity userSimilarity=userSimilarityOptional.get();
+            List<Similarity> similarities=userSimilarity.getSimilarities();
+            similarities.sort(Comparator.comparing(Similarity::getSimilarity));
+
+            if(similarities.size()>TOP_SIMILAR){
+                similarities=similarities.subList(0,TOP_SIMILAR);
+            }
+
+            //获取相关度高的用户的兴趣列表
+            List<UserInterest> userInterests=new ArrayList<>();
+            for(Similarity similarity:similarities){
+                userInterests.add(userInterestRepository.findById(similarity.getUid().longValue()).get());
+            }
+
+            //获取相关度高的用户的感兴趣论文的并集
+            Set<Long> paperIdSet=new HashSet<>();
+            for(UserInterest userInterest:userInterests){
+                for(PaperInterest paperInterest:userInterest.getPaperInterests()){
+                    paperIdSet.add(paperInterest.getPaperId());
+                }
+            }
+
+            //将所有感兴趣论文id按升序排序
+            List<Long> paperIds=new ArrayList<>(paperIdSet);
+            paperIds.sort(Comparator.comparing(Long::longValue));
+
+            //对齐用户兴趣(给没有兴趣的补为0)
+            for(UserInterest userInterest:userInterests){
+                List<PaperInterest> paperInterests=userInterest.getPaperInterests();
+                paperInterests.sort(Comparator.comparing(PaperInterest::getPaperId));
+                List<PaperInterest> newPaperInterest=new ArrayList<>();
+
+                int paper_interest_index=0;
+                for(Long paperId:paperIds){
+                    if(paper_interest_index<paperInterests.size()){
+                        if(paperInterests.get(paper_interest_index).getPaperId()>paperId){
+                            newPaperInterest.add(new PaperInterest(paperId,0.0));
+                        }
+                        else{
+                            newPaperInterest.add(paperInterests.get(paper_interest_index++));
+                        }
+                    }
+                    else{
+                        newPaperInterest.add(new PaperInterest(paperId,0.0));
+                    }
+
+                }
+                userInterest.setPaperInterests(newPaperInterest);
+            }
+
+            List<PaperRecommend> paperRecommendList=new ArrayList<>();
+            for(Long paperId:paperIds){
+                paperRecommendList.add(new PaperRecommend(paperId,0.0));
+            }
+
+            for(int i=0;i<similarities.size();i++){
+                Similarity similarity=similarities.get(i);
+                UserInterest userInterest=userInterests.get(i);
+                for(int j=0;j<paperIds.size();j++){
+                    double weight=paperRecommendList.get(j).getWeight();
+                    paperRecommendList.get(j).setWeight(weight+userInterest.getPaperInterests().get(j).getInterest()*similarity.getSimilarity());
+                }
+            }
+            paperRecommendList.sort(Comparator.comparing(PaperRecommend::getWeight).reversed());
+            UserRecommend userRecommend=new UserRecommend(uid,paperRecommendList);
+            userRecommendRepository.save(userRecommend);
+            return ResponseVO.buildSuccess("推荐列表更新成功");
+        }
+        else{
+            return ResponseVO.buildFailure("用户暂无相似度数据");
+        }
+    }
+
+
 
     //遍历计算所有其他用户和当前用户的相似度
     private void iterateSimilarity(List<UserInterest> userInterests, UserInterest userInterest, List<PaperInterest> paperInterests, List<Similarity> similarities) {
