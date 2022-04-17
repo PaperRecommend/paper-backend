@@ -50,6 +50,7 @@ public class PaperServiceImpl implements PaperService {
     public List<Paper> queryPaper(final String key, final String returnFacets,
                                      int pageNum, int pageSize,HttpServletRequest request,
                                   HttpServletResponse response) {
+
         Integer uid=Integer.valueOf(cookieUtils.getValue(request,"uid"));
         userService.recordSearch(uid,key);
 
@@ -81,9 +82,21 @@ public class PaperServiceImpl implements PaperService {
         else{
             return null;
         }
-        String qid = UUID.randomUUID().toString().replaceAll("-", "");
-        request.getSession().setAttribute(qid,wholeList);
-        cookieUtils.set(response,"qid",qid);
+        if(request!=null&&response!=null){
+            String qid = UUID.randomUUID().toString().replaceAll("-", "");
+            request.getSession().setAttribute(qid,wholeList);
+            cookieUtils.set(response,"qid",qid);
+        }
+
+        return paperList;
+    }
+
+    //mock查询使用的接口
+    public List<Paper> queryPaper(String key,int pageNum, int pageSize,Integer uid){
+        userService.recordSearch(uid,key);
+        Pageable pageable= PageRequest.of(pageNum,pageSize);
+
+        List<Paper> paperList=paperRepository.findByKey(key,pageable);
         return paperList;
     }
 

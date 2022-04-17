@@ -13,6 +13,8 @@ public interface PaperService {
                            int pageNum, int pageSize, HttpServletRequest request,
                            HttpServletResponse response);
 
+    List<Paper> queryPaper(String key,int pageNum, int pageSize,Integer uid);
+
     PaperSummaryVO papersSummary(String qid,HttpServletRequest request);
 
     List<Paper> queryPaperRefine(String qid,List<String> refinements,

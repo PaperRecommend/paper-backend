@@ -94,4 +94,13 @@ public class UserController {
         List<Paper> papers=userService.getUserCollection(uid);
         return papers.isEmpty()?ResponseUtils.failure(papers):ResponseUtils.success(papers);
     }
+
+    @ApiOperation("模拟用户操作")
+    @PostMapping("/mock-user-action")
+    public ResponseEntity<ResponseVO> mockUserAction(
+            @RequestParam(name="username_prefix")String prefix,
+            @RequestParam(name="num",defaultValue = "100")int num){
+        userService.mockUserAction(prefix,num);
+        return null;
+    }
 }

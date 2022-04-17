@@ -68,20 +68,6 @@ public class PaperController {
         System.out.println(qid);
         return ResponseUtils.success(paperService.papersSummary(qid, request));
     }
-//
-//    /**
-//     * 添加新paper接口
-//     *
-//     * @param paperVO : paper实体
-//     */
-//    @PostMapping(path = "/paper")
-//    public void insertPaper(@RequestBody JSONObject paperVO) {
-//        try {
-//            PaperInsertVO entity = paperVO.toJavaObject(PaperInsertVO.class);
-//            paperService.insertPaperVOEntity(entity);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+
 }
 

@@ -195,7 +195,7 @@ public class UserRecommendServiceImpl implements UserRecommendService {
         if(userSimilarityOptional.isPresent()){
             UserSimilarity userSimilarity=userSimilarityOptional.get();
             List<Similarity> similarities=userSimilarity.getSimilarities();
-            similarities.sort(Comparator.comparing(Similarity::getSimilarity));
+            similarities.sort(Comparator.comparing(Similarity::getSimilarity).reversed());
 
             if(similarities.size()>TOP_SIMILAR){
                 similarities=similarities.subList(0,TOP_SIMILAR);
@@ -291,6 +291,7 @@ public class UserRecommendServiceImpl implements UserRecommendService {
             if(paperRecommends.size()>n){
                 paperRecommends=paperRecommends.subList(0,n);
             }
+            System.out.println("recommend size:"+paperRecommends.size());
             return paperRecommends;
         }
         return new ArrayList<>();

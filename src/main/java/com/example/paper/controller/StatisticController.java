@@ -34,8 +34,7 @@ public class StatisticController {
                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         return ResponseUtils.success(statisticService.statisticAuthor(pageNum,pageSize));
     }
-
-
+    
     /**
      * @return
      */
@@ -83,7 +82,5 @@ public class StatisticController {
     public ResponseEntity<StaFieldVO> getFieldDetail(@RequestParam(name = "id") long id) {
         return ResponseUtils.success(statisticService.getFieldDetail(id));
     }
-
-
 
 }

@@ -38,6 +38,8 @@ public interface UserService {
 
     List<Paper> getUserCollection(Integer uid);
 
+    ResponseVO mockUserAction(String prefix,int num);
+
     void recordSearch(Integer uid,String searchContent);
 
 }
