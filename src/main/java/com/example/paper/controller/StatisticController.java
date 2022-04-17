@@ -34,7 +34,7 @@ public class StatisticController {
                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         return ResponseUtils.success(statisticService.statisticAuthor(pageNum,pageSize));
     }
-    
+
     /**
      * @return
      */

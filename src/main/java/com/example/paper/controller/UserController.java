@@ -100,7 +100,7 @@ public class UserController {
     public ResponseEntity<ResponseVO> mockUserAction(
             @RequestParam(name="username_prefix")String prefix,
             @RequestParam(name="num",defaultValue = "100")int num){
-        userService.mockUserAction(prefix,num);
-        return null;
+        ResponseVO responseVO=userService.mockUserAction(prefix,num);
+        return responseVO.isSuccess()?ResponseUtils.success(responseVO):ResponseUtils.failure(responseVO);
     }
 }

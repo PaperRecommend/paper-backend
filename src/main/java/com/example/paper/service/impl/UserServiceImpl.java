@@ -204,7 +204,9 @@ public class UserServiceImpl implements UserService {
             return ResponseVO.buildFailure("此前缀名已被使用");
         }
         Random random=new Random();
-        String[] keys=new String[]{"Bert","nlp","big data","rnn"};
+        String[] keys=new String[]{"cnn","nlp","big data","rnn","computer","search","distribute",
+        "system","data","svm"};
+        int key_size=keys.length;
         List<Integer> uid_list=new ArrayList<>();
         for(int i=0;i<num;i++){
             UserPO userPO=new UserPO(prefix+"_"+i,md5("123456"));
@@ -212,10 +214,9 @@ public class UserServiceImpl implements UserService {
             uid_list.add(userPO.getId());
         }
         for(Integer uid:uid_list){
-
-            List<Paper> papers=paperService.queryPaper(keys[uid%4],0
-                    ,20,uid);
-            //在20个论文里面随机点击8-12篇论文,每篇随机点击1-4次,每篇随机决定是否收藏
+            List<Paper> papers=paperService.queryPaper(keys[random.nextInt(key_size)],0
+                    ,80,uid);
+            //在80个论文里面随机点击8-12篇论文,每篇随机点击1-4次,每篇随机决定是否收藏
             int paperNumRandom=random.nextInt(5)+8;
 
             List<Paper> randomPapers=randomGetPaper(papers,paperNumRandom);
@@ -250,6 +251,9 @@ public class UserServiceImpl implements UserService {
             res.add(base.get(index));
             base.remove(index);
             size--;
+            if(size<1){
+                break;
+            }
         }
         return res;
     }
