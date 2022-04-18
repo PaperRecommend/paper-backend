@@ -4,9 +4,11 @@ import com.example.paper.dao.LdaRecommend;
 import com.example.paper.entity.ldarecommendEntity.LdaUserPaper;
 import com.example.paper.service.LdaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+@Service
 public class LdaServiceImpl implements LdaService {
 
     @Autowired

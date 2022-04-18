@@ -79,11 +79,12 @@ public class UserRecommendController {
 
     @ApiOperation("/计算用户的lda推荐论文")
     @GetMapping("/lda-topic/cal_papers")
-    public ResponseEntity<String> getUserRecommend(@RequestParam("uid")Integer uid){
+    public ResponseEntity<String> calUserRecommend(@RequestParam("uid")Integer uid){
         RestTemplate restTemplate=new RestTemplate();
         Map<String, Integer> params=new HashMap<>();
         params.put("uid",uid);  //
         ResponseEntity<String> response=restTemplate.getForEntity("http://172.29.7.234:5000/api/get-single-recommend/?uid={uid}",String.class,params);
         return response;
     }
+
 }
