@@ -2,6 +2,7 @@ package com.example.paper.controller;
 
 import com.example.paper.entity.paperEntity.Paper;
 import com.example.paper.entity.vo.PaperSummaryVO;
+import com.example.paper.entity.vo.QueryPaperVO;
 import com.example.paper.service.PaperService;
 import com.example.paper.utils.ResponseUtils;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class PaperController {
      * @return json
      */
     @GetMapping("/paper/list")
-    public ResponseEntity<List<Paper>> queryPaper(
+    public ResponseEntity<QueryPaperVO> queryPaper(
             @RequestParam(name = "query") String query,
             @RequestParam(name = "returnFacets") String returnFacets,
             @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
@@ -48,7 +49,7 @@ public class PaperController {
      * @param pageSize    : 页大小
      */
     @GetMapping("/paper/refine")
-    public ResponseEntity<List<Paper>> queryPaperRefine(
+    public ResponseEntity<QueryPaperVO> queryPaperRefine(
             @CookieValue(name = "qid") String qid,
             @RequestParam(name = "refinements") List<String> refinements,
             @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
