@@ -6,11 +6,15 @@ import com.example.paper.service.UserRecommendService;
 import com.example.paper.utils.ResponseUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Api(tags="用户推荐接口")
 @RestController
@@ -71,5 +75,15 @@ public class UserRecommendController {
                                                                  @RequestParam(name = "n",defaultValue = "10")int n){
         List<PaperRecommend> paperRecommends=userRecommendService.getUserRecommend(uid,n);
         return paperRecommends.isEmpty()?ResponseUtils.failure(paperRecommends):ResponseUtils.success(paperRecommends);
+    }
+
+    @ApiOperation("/计算用户的lda推荐论文")
+    @GetMapping("/lda-topic/cal_papers")
+    public ResponseEntity<String> getUserRecommend(@RequestParam("uid")Integer uid){
+        RestTemplate restTemplate=new RestTemplate();
+        Map<String, Integer> params=new HashMap<>();
+        params.put("uid",uid);  //
+        ResponseEntity<String> response=restTemplate.getForEntity("http://172.29.7.234:5000/api/get-single-recommend/?uid={uid}",String.class,params);
+        return response;
     }
 }
