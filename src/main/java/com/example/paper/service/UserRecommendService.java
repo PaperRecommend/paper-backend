@@ -1,5 +1,6 @@
 package com.example.paper.service;
 
+import com.example.paper.entity.paperEntity.Paper;
 import com.example.paper.entity.userRecommendEntity.PaperRecommend;
 import com.example.paper.entity.userRecommendEntity.UserRecommend;
 import com.example.paper.entity.vo.ResponseVO;
@@ -20,4 +21,6 @@ public interface UserRecommendService {
     ResponseVO recommendAllUpdate();
 
     List<PaperRecommend> getUserRecommend(Integer uid, int n);
+
+    List<Paper> mixedRecommend(Integer uid, int size);
 }

@@ -1,6 +1,7 @@
 package com.example.paper.service.impl;
 
 import com.example.paper.dao.*;
+import com.example.paper.entity.paperEntity.Paper;
 import com.example.paper.entity.userActionEntity.ClickAction;
 import com.example.paper.entity.userActionEntity.PaperCollection;
 import com.example.paper.entity.userActionEntity.UserAction;
@@ -11,6 +12,7 @@ import com.example.paper.entity.userRecommendEntity.UserRecommend;
 import com.example.paper.entity.userSimilarityEntity.Similarity;
 import com.example.paper.entity.userSimilarityEntity.UserSimilarity;
 import com.example.paper.entity.vo.ResponseVO;
+import com.example.paper.service.LdaService;
 import com.example.paper.service.UserRecommendService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -40,6 +42,11 @@ public class UserRecommendServiceImpl implements UserRecommendService {
     UserSimilarityRepository userSimilarityRepository;
     @Autowired
     UserRecommendRepository userRecommendRepository;
+    @Autowired
+    PaperRepository paperRepository;
+    @Autowired
+    LdaService ldaService;
+
 
     @Override
     public ResponseVO interestSingleUpdate(Integer uid) {
@@ -238,7 +245,6 @@ public class UserRecommendServiceImpl implements UserRecommendService {
                     else{
                         newPaperInterest.add(new PaperInterest(paperId,0.0));
                     }
-
                 }
                 userInterest.setPaperInterests(newPaperInterest);
             }
@@ -256,6 +262,17 @@ public class UserRecommendServiceImpl implements UserRecommendService {
                     paperRecommendList.get(j).setWeight(weight+userInterest.getPaperInterests().get(j).getInterest()*similarity.getSimilarity());
                 }
             }
+            //把权重为0的推荐论文过滤掉
+            paperRecommendList.sort(Comparator.comparing(PaperRecommend::getWeight).reversed());
+
+            int zero_idx=paperRecommendList.size();
+            for(int i=0;i<paperRecommendList.size();i++){
+                if(paperRecommendList.get(i).getWeight().equals(0.0)){
+                    zero_idx=i;
+                    break;
+                }
+            }
+            paperRecommendList=paperRecommendList.subList(0,zero_idx);
 
             //过滤掉用户已经产生收藏和点击行为的论文
             List<PaperCollection> paperCollections=userActionRepository.findById(uid.longValue()).get().getPaperCollections();
@@ -274,6 +291,7 @@ public class UserRecommendServiceImpl implements UserRecommendService {
             int index_1=0,index_2=0;
             int size_1=actionPaperIdList.size(),size_2=paperRecommendList.size();
             List<Integer> removeList=new ArrayList<>();
+
             while(index_1<size_1&&index_2<size_2){
                 Long long_1=actionPaperIdList.get(index_1);
                 Long long_2=paperRecommendList.get(index_2).getPaperId();
@@ -293,17 +311,7 @@ public class UserRecommendServiceImpl implements UserRecommendService {
                 paperRecommendList.remove(removeList.get(i)-i);
             }
 
-            //把权重为0的推荐论文过滤掉
             paperRecommendList.sort(Comparator.comparing(PaperRecommend::getWeight).reversed());
-            int zero_idx=0;
-            for(int i=0;i<paperRecommendList.size();i++){
-                if(paperRecommendList.get(i).getWeight().equals(0.0)){
-                    zero_idx=i;
-                    break;
-                }
-            }
-            paperRecommendList=paperRecommendList.subList(0,zero_idx);
-
             UserRecommend userRecommend=new UserRecommend(uid,paperRecommendList);
             userRecommendRepository.save(userRecommend);
             return ResponseVO.buildSuccess("推荐列表更新成功");
@@ -314,6 +322,7 @@ public class UserRecommendServiceImpl implements UserRecommendService {
     }
 
     @Override
+    @Scheduled(cron = "0 0 0 * * ?")
     public ResponseVO recommendAllUpdate() {
         List<Integer> uid_list=userRepository.getAllUserId();
         for(Integer uid:uid_list){
@@ -330,13 +339,37 @@ public class UserRecommendServiceImpl implements UserRecommendService {
             if(paperRecommends.size()>n){
                 paperRecommends=paperRecommends.subList(0,n);
             }
-            System.out.println("recommend size:"+paperRecommends.size());
             return paperRecommends;
         }
         else{
             return new ArrayList<>();
         }
 
+    }
+
+    @Override
+    public List<Paper> mixedRecommend(Integer uid, int size) {
+        int cfSize;
+        Optional<UserRecommend> userRecommendOptional=userRecommendRepository.findById(uid.longValue());
+        List<Long> wholeRecommendList=new ArrayList<>();
+        if(userRecommendOptional.isPresent()){
+            List<PaperRecommend> paperRecommendList=userRecommendOptional.get().getPaperRecommendList();
+            cfSize=Math.min(size*2,paperRecommendList.size());
+            for(int i=0;i<cfSize;i++){
+                wholeRecommendList.add(paperRecommendList.get(i).getPaperId());
+            }
+        }
+        else{
+            cfSize=0;
+        }
+        int ldaSize=Math.min(5*size-cfSize,60);
+        wholeRecommendList.addAll(ldaService.getUserLdaPapers(uid,ldaSize));
+        List<Long> recommendList=UserServiceImpl.randomGetPaper(wholeRecommendList,size);
+        List<Paper> papers=new ArrayList<>();
+        for(Long paperId:recommendList){
+            papers.add(paperRepository.findById(paperId).get());
+        }
+        return papers;
     }
 
 
@@ -354,7 +387,6 @@ public class UserRecommendServiceImpl implements UserRecommendService {
             }
         }
     }
-
 
 
     //采用最大最小标准化
@@ -467,8 +499,5 @@ public class UserRecommendServiceImpl implements UserRecommendService {
             copy.add(iter.next());
         return copy;
     }
-
-
-
 
 }

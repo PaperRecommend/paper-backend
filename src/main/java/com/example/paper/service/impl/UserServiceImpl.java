@@ -204,8 +204,8 @@ public class UserServiceImpl implements UserService {
             return ResponseVO.buildFailure("此前缀名已被使用");
         }
         Random random=new Random();
-        String[] keys=new String[]{"cnn","nlp","big data","rnn","computer","search","distribute",
-        "system","data","svm"};
+        String[] keys=new String[]{"cnn","nlp","big data","rnn","computer","search",
+        "system","data"};
         int key_size=keys.length;
         List<Integer> uid_list=new ArrayList<>();
         for(int i=0;i<num;i++){
@@ -242,7 +242,7 @@ public class UserServiceImpl implements UserService {
      * @param cnt
      * @return
      */
-    private <T> List<T> randomGetPaper(List<T> base,int cnt){
+    public static <T> List<T> randomGetPaper(List<T> base,int cnt){
         List<T> res=new ArrayList<>();
         Random random=new Random();
         int size=base.size();

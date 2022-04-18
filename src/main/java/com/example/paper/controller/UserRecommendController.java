@@ -1,5 +1,6 @@
 package com.example.paper.controller;
 
+import com.example.paper.entity.paperEntity.Paper;
 import com.example.paper.entity.userRecommendEntity.PaperRecommend;
 import com.example.paper.entity.vo.ResponseVO;
 import com.example.paper.service.UserRecommendService;
@@ -85,6 +86,14 @@ public class UserRecommendController {
         params.put("uid",uid);  //
         ResponseEntity<String> response=restTemplate.getForEntity("http://172.29.7.234:5000/api/get-single-recommend/?uid={uid}",String.class,params);
         return response;
+    }
+
+    @ApiOperation("/获取用户的混合推荐论文")
+    @GetMapping("/paper-recommend/mixed")
+    public ResponseEntity<List<Paper>> mixedRecommend(@RequestParam("uid")Integer uid,
+                                                      @RequestParam("size")int size){
+        List<Paper> recommendList=userRecommendService.mixedRecommend(uid,size);
+        return ResponseUtils.success(recommendList);
     }
 
 }
