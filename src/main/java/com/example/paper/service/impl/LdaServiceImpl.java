@@ -5,10 +5,7 @@ import com.example.paper.entity.ldarecommendEntity.LdaUserPaper;
 import com.example.paper.service.LdaService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 public class LdaServiceImpl implements LdaService {
 
@@ -25,9 +22,7 @@ public class LdaServiceImpl implements LdaService {
         if (opt.isPresent()) {
             LdaUserPaper ldaUserPaper = opt.get();
             Long[] paperIds = ldaUserPaper.getPapers();
-            for (Long id : paperIds) {
-                list.add(id);
-            }
+            list.addAll(Arrays.asList(paperIds));
             if (size >= paperIds.length) {
                 return list;
             } else {
