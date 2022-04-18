@@ -13,6 +13,7 @@ import com.example.paper.entity.userActionEntity.UserAction;
 import com.example.paper.entity.userSearchEntity.SearchAction;
 import com.example.paper.entity.userSearchEntity.UserSearch;
 import com.example.paper.entity.vo.ResponseVO;
+import com.example.paper.service.PaperService;
 import com.example.paper.service.UserService;
 
 import java.util.*;
@@ -43,6 +44,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     PaperRepository paperRepository;
+
+    @Autowired
+    PaperService paperService;
 
     @Override
     public int getUserCount() {
@@ -192,6 +196,66 @@ public class UserServiceImpl implements UserService {
         else{
             return new ArrayList<>();
         }
+    }
+
+    @Override
+    public ResponseVO mockUserAction(String prefix,int num) {
+        if(getIdByUsername(prefix+"_0")!=-1){
+            return ResponseVO.buildFailure("此前缀名已被使用");
+        }
+        Random random=new Random();
+        String[] keys=new String[]{"cnn","nlp","big data","rnn","computer","search","distribute",
+        "system","data","svm"};
+        int key_size=keys.length;
+        List<Integer> uid_list=new ArrayList<>();
+        for(int i=0;i<num;i++){
+            UserPO userPO=new UserPO(prefix+"_"+i,md5("123456"));
+            userRepository.save(userPO);
+            uid_list.add(userPO.getId());
+        }
+        for(Integer uid:uid_list){
+            List<Paper> papers=paperService.queryPaper(keys[random.nextInt(key_size)],0
+                    ,80,uid);
+            //在80个论文里面随机点击8-12篇论文,每篇随机点击1-4次,每篇随机决定是否收藏
+            int paperNumRandom=random.nextInt(5)+8;
+
+            List<Paper> randomPapers=randomGetPaper(papers,paperNumRandom);
+            for(Paper paper:randomPapers){
+                Long paperId=paper.getId();
+                int clickCnt=random.nextInt(4)+1;
+                boolean collect=random.nextBoolean();
+                for(int i=0;i<clickCnt;i++){
+                    clickAction(uid,paperId);
+                }
+                if(collect){
+                    collectPaper(uid,paperId);
+                }
+            }
+            System.out.println("generate user action:"+uid);
+        }
+        return ResponseVO.buildSuccess("模拟用户成功");
+    }
+
+    /**
+     * 从base数组中随机选取cnt个不重复的元素
+     * @param base
+     * @param cnt
+     * @return
+     */
+    private <T> List<T> randomGetPaper(List<T> base,int cnt){
+        List<T> res=new ArrayList<>();
+        Random random=new Random();
+        int size=base.size();
+        for(int i=0;i<cnt;i++){
+            int index=random.nextInt(size);
+            res.add(base.get(index));
+            base.remove(index);
+            size--;
+            if(size<1){
+                break;
+            }
+        }
+        return res;
     }
 
     @Override

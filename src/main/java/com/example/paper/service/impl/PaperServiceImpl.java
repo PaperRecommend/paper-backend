@@ -7,6 +7,7 @@ import com.example.paper.entity.paperEntity.Fos;
 import com.example.paper.entity.paperEntity.Paper;
 import com.example.paper.entity.paperEntity.Venue;
 import com.example.paper.entity.vo.PaperSummaryVO;
+import com.example.paper.entity.vo.QueryPaperVO;
 import com.example.paper.exception.BadReqException;
 import com.example.paper.service.PaperService;
 import com.example.paper.service.UserService;
@@ -47,9 +48,10 @@ public class PaperServiceImpl implements PaperService {
 
     @Override
     @Cacheable(cacheNames = "queryPaper", unless = "#result==null")
-    public List<Paper> queryPaper(final String key, final String returnFacets,
-                                     int pageNum, int pageSize,HttpServletRequest request,
-                                  HttpServletResponse response) {
+    public QueryPaperVO queryPaper(final String key, final String returnFacets,
+                                   int pageNum, int pageSize, HttpServletRequest request,
+                                   HttpServletResponse response) {
+
         Integer uid=Integer.valueOf(cookieUtils.getValue(request,"uid"));
         userService.recordSearch(uid,key);
 
@@ -81,9 +83,21 @@ public class PaperServiceImpl implements PaperService {
         else{
             return null;
         }
-        String qid = UUID.randomUUID().toString().replaceAll("-", "");
-        request.getSession().setAttribute(qid,wholeList);
-        cookieUtils.set(response,"qid",qid);
+        if(request!=null&&response!=null){
+            String qid = UUID.randomUUID().toString().replaceAll("-", "");
+            request.getSession().setAttribute(qid,wholeList);
+            cookieUtils.set(response,"qid",qid);
+        }
+
+        return new QueryPaperVO(paperList,wholeList.size());
+    }
+
+    //mock查询使用的接口
+    public List<Paper> queryPaper(String key,int pageNum, int pageSize,Integer uid){
+        userService.recordSearch(uid,key);
+        Pageable pageable= PageRequest.of(pageNum,pageSize);
+
+        List<Paper> paperList=paperRepository.findByKey(key,pageable);
         return paperList;
     }
 
@@ -130,14 +144,14 @@ public class PaperServiceImpl implements PaperService {
     }
 
     @Override
-    public List<Paper> queryPaperRefine(String qid, List<String> refinements, int pageNum, int pageSize, HttpServletRequest request) {
+    public QueryPaperVO queryPaperRefine(String qid, List<String> refinements, int pageNum, int pageSize, HttpServletRequest request) {
         List<Paper> wholeList=(List<Paper>)request.getSession().getAttribute(qid);
         List<Paper> refineList=paperRefine(wholeList,refinements);
 
         List<Paper> paperList=pageHelper.of(refineList,pageSize,pageNum);
 //        System.out.println("refine 分页前大小"+refineList.size());
 //        System.out.println("refine 分页后大小"+paperList.size());
-        return paperList;
+        return new QueryPaperVO(paperList,refineList.size());
     }
 
     private List<Paper> paperRefine(List<Paper> papers,List<String> refinements){

@@ -49,6 +49,7 @@ public class UserRecommendController {
     @ApiOperation("计算用户的推荐论文")
     @PostMapping("/paper-recommend/single-update")
     public ResponseEntity<ResponseVO> recommendSingleUpdate(Integer uid){
+
         userRecommendService.interestSingleUpdate(uid);
         userRecommendService.singleUserSimilarity(uid);
         ResponseVO responseVO=userRecommendService.recommendSingleUpdate(uid);

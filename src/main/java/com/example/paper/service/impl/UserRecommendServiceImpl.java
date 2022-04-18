@@ -195,7 +195,7 @@ public class UserRecommendServiceImpl implements UserRecommendService {
         if(userSimilarityOptional.isPresent()){
             UserSimilarity userSimilarity=userSimilarityOptional.get();
             List<Similarity> similarities=userSimilarity.getSimilarities();
-            similarities.sort(Comparator.comparing(Similarity::getSimilarity));
+            similarities.sort(Comparator.comparing(Similarity::getSimilarity).reversed());
 
             if(similarities.size()>TOP_SIMILAR){
                 similarities=similarities.subList(0,TOP_SIMILAR);
@@ -256,6 +256,44 @@ public class UserRecommendServiceImpl implements UserRecommendService {
                     paperRecommendList.get(j).setWeight(weight+userInterest.getPaperInterests().get(j).getInterest()*similarity.getSimilarity());
                 }
             }
+
+            //过滤掉用户已经产生收藏和点击行为的论文
+            List<PaperCollection> paperCollections=userActionRepository.findById(uid.longValue()).get().getPaperCollections();
+            List<ClickAction> clickActions=userActionRepository.findById(uid.longValue()).get().getClickActions();
+            Set<Long> actionPaperIdSet=new HashSet<>();
+            for(PaperCollection paperCollection:paperCollections){
+                actionPaperIdSet.add(paperCollection.getPaperId());
+            }
+            for(ClickAction clickAction:clickActions){
+                actionPaperIdSet.add(clickAction.getPaperId());
+            }
+            List<Long> actionPaperIdList=new ArrayList<>(actionPaperIdSet);
+            actionPaperIdList.sort(Comparator.comparing(Long::longValue));
+            paperRecommendList.sort(Comparator.comparing(PaperRecommend::getPaperId));
+
+            int index_1=0,index_2=0;
+            int size_1=actionPaperIdList.size(),size_2=paperRecommendList.size();
+            List<Integer> removeList=new ArrayList<>();
+            while(index_1<size_1&&index_2<size_2){
+                Long long_1=actionPaperIdList.get(index_1);
+                Long long_2=paperRecommendList.get(index_2).getPaperId();
+                if(long_1.equals(long_2)){
+                    removeList.add(index_2);
+                    index_1++;
+                    index_2++;
+                }
+                else if(long_1>long_2){
+                    index_2++;
+                }
+                else{
+                    index_1++;
+                }
+            }
+            for(int i=0;i<removeList.size();i++){
+                paperRecommendList.remove(removeList.get(i)-i);
+            }
+
+            //把权重为0的推荐论文过滤掉
             paperRecommendList.sort(Comparator.comparing(PaperRecommend::getWeight).reversed());
             int zero_idx=0;
             for(int i=0;i<paperRecommendList.size();i++){
@@ -265,6 +303,7 @@ public class UserRecommendServiceImpl implements UserRecommendService {
                 }
             }
             paperRecommendList=paperRecommendList.subList(0,zero_idx);
+
             UserRecommend userRecommend=new UserRecommend(uid,paperRecommendList);
             userRecommendRepository.save(userRecommend);
             return ResponseVO.buildSuccess("推荐列表更新成功");
@@ -291,9 +330,13 @@ public class UserRecommendServiceImpl implements UserRecommendService {
             if(paperRecommends.size()>n){
                 paperRecommends=paperRecommends.subList(0,n);
             }
+            System.out.println("recommend size:"+paperRecommends.size());
             return paperRecommends;
         }
-        return new ArrayList<>();
+        else{
+            return new ArrayList<>();
+        }
+
     }
 
 
