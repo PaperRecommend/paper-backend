@@ -84,6 +84,12 @@ public class StatisticController {
         return ResponseUtils.success(statisticService.getFieldDetail(id));
     }
 
+    @GetMapping("/field/id")
+    public ResponseEntity<Long> getFieldDetail(@RequestParam(name = "name") String name) {
+        Long id=statisticService.getFieldIdByName(name);
+        return id==-1L?ResponseUtils.failure(id):ResponseUtils.success(id);
+    }
+
 
 
 }

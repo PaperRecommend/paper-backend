@@ -21,4 +21,6 @@ public interface StatisticService {
 
     StaFieldVO getFieldDetail(long id);
 
+    Long getFieldIdByName(String name);
+
 }

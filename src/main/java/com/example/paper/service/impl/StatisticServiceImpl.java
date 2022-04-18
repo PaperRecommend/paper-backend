@@ -147,4 +147,14 @@ public class StatisticServiceImpl implements StatisticService {
         }
         return staFieldVO;
     }
+
+    @Override
+    public Long getFieldIdByName(String name) {
+        List<StaFieldVO> list=staFieldRepository.getFieldIdByName(name);
+        Long id=-1L;
+        if(list.size()!=0){
+            id=list.get(0).getId();
+        }
+        return id;
+    }
 }
