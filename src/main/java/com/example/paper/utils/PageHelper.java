@@ -1,26 +1,10 @@
 package com.example.paper.utils;
 
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
-
-import java.util.Comparator;
 import java.util.List;
 
 @Component
 public class PageHelper {
-    private static class ActivenessComparator implements Comparator {
-        private final static String activeKey = "activeness";
-
-        @Override
-        public int compare(Object o1, Object o2) {
-            JSONObject obj1 = (JSONObject) o1;
-            JSONObject obj2 = (JSONObject) o2;
-            double res = obj2.getDouble(activeKey) - obj1.getDouble(activeKey);
-            if (res == 0) return 0;
-            else return res > 0 ? 1 : -1;
-        }
-    }
-
     public <T> List<T> of(List<T> list, Integer pageSize, Integer pageNum) {
         if (pageNum == -1) return list;
         if (0 == pageNum) ++pageNum;
@@ -57,6 +41,4 @@ public class PageHelper {
 
         return pageList;
     }
-
-
 }

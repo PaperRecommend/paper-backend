@@ -57,7 +57,6 @@ public class PaperServiceImpl implements PaperService {
 
         Pageable pageable= PageRequest.of(pageNum,pageSize);
         Pageable wholePageable=PageRequest.of(0,MAX_RESULT_SIZE);
-        //TODO: 后期通过先到es中查询匹配数量，告知用户总匹配数，然后只显示前n条
         List<Paper> paperList;
         List<Paper> wholeList;
         if(returnFacets.equals("all")){
@@ -88,7 +87,6 @@ public class PaperServiceImpl implements PaperService {
             request.getSession().setAttribute(qid,wholeList);
             cookieUtils.set(response,"qid",qid);
         }
-
         return new QueryPaperVO(paperList,wholeList.size());
     }
 
@@ -116,7 +114,6 @@ public class PaperServiceImpl implements PaperService {
                     termCount.put(fos.getName(),termCount.getOrDefault(fos.getName(),0)+1);
                 }
             }
-
             Author[] authors=p.getAuthors();
             if(authors!=null&&authors.length!=0){
                 for(Author author:authors){
@@ -149,8 +146,6 @@ public class PaperServiceImpl implements PaperService {
         List<Paper> refineList=paperRefine(wholeList,refinements);
 
         List<Paper> paperList=pageHelper.of(refineList,pageSize,pageNum);
-//        System.out.println("refine 分页前大小"+refineList.size());
-//        System.out.println("refine 分页后大小"+paperList.size());
         return new QueryPaperVO(paperList,refineList.size());
     }
 

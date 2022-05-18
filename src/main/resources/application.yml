@@ -7,17 +7,15 @@ spring:
     url: jdbc:mysql://121.5.234.218:3306/paper?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
     username: wuminxuan
     password: Wuminxuan@123
-
-  # 应用服务 WEB 访问端口
+# 应用服务 WEB 访问端口
 server:
   port: 8081
 # es 服务地址
 elasticsearch:
   host: 172.29.7.234
-  # es 服务端口
+# es 服务端口
   port: 9200
-
-  # 配置日志级别,开启 debug 日志
+# 配置日志级别,开启 debug 日志
 logging:
   level:
     com:

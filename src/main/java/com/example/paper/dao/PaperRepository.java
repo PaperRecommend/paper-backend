@@ -12,7 +12,6 @@ import java.util.List;
 @Repository
 public interface PaperRepository extends ElasticsearchRepository<Paper, Long>{
     @Query("{\"multi_match\": {\"query\": \"?0\",\"fields\": [\"title^4\",\"abstract_^2\",\"fos.name\",\"authors.name\"]}}")
-
     List<Paper> findByKey(String key,Pageable pageable);
 
 

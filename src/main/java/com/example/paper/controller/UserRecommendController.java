@@ -7,7 +7,6 @@ import com.example.paper.service.UserRecommendService;
 import com.example.paper.utils.ResponseUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -94,6 +93,14 @@ public class UserRecommendController {
                                                       @RequestParam("size")int size){
         List<Paper> recommendList=userRecommendService.mixedRecommend(uid,size);
         return ResponseUtils.success(recommendList);
+    }
+
+    @ApiOperation("/计算uid区间内的用户平均协同过滤推荐论文数量")
+    @GetMapping("/paper-recommend/count_average")
+    public ResponseEntity<Double> countAverage(@RequestParam("begin_uid")Integer begin_uid,
+                                               @RequestParam("end_uid")Integer end_uid){
+        Double average= userRecommendService.countAverage(begin_uid,end_uid);
+        return ResponseUtils.success(average);
     }
 
 }

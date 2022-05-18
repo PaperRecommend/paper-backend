@@ -30,7 +30,8 @@ import java.util.*;
 public class UserRecommendServiceImpl implements UserRecommendService {
 
     private static final int MILLS_DAY=1000*60*60*24;
-    private static final int TOP_SIMILAR=10;
+    private static final int TOP_SIMILAR=40;
+    private static final double THRESHOLD_WEIGHT=0.1;
 
     @Autowired
     UserRepository userRepository;
@@ -51,19 +52,21 @@ public class UserRecommendServiceImpl implements UserRecommendService {
     @Override
     public ResponseVO interestSingleUpdate(Integer uid) {
         Optional<UserAction> userActionOptional=userActionRepository.findById(uid.longValue());
-
+        //获取用户的行为数据
         if(userActionOptional.isPresent()){
             UserAction userAction=userActionOptional.get();
             UserInterest userInterest=new UserInterest(uid);
-
             List<PaperInterest> paperInterests=new ArrayList<>();
 
             List<ClickAction> clickActions=userAction.getClickActions();
             List<PaperCollection> paperCollections=userAction.getPaperCollections();
+            //获取用户的点击行为和收藏行为
 
             clickActions.sort(Comparator.comparing(ClickAction::getPaperId));
             paperCollections.sort(Comparator.comparing(PaperCollection::getPaperId));
 
+            //计算用户对每一篇论文产生的兴趣度，注意因为要处理用户对某一篇论文只有点击没有收藏，
+            // 或者只有收藏没有点击的情况，使用了两个指针对两个列表进行遍历
             int c_index=0,p_index=0;
             int c_size=clickActions.size(),p_size=paperCollections.size();
             while(c_index<c_size&&p_index<p_size){
@@ -97,7 +100,6 @@ public class UserRecommendServiceImpl implements UserRecommendService {
                 c_index++;
                 paperInterests.add(paperInterest);
             }
-
             while(p_index<p_size){
                 PaperCollection current_paper=paperCollections.get(p_index);
                 PaperInterest paperInterest=new PaperInterest(current_paper.getPaperId(),
@@ -105,7 +107,7 @@ public class UserRecommendServiceImpl implements UserRecommendService {
                 p_index++;
                 paperInterests.add(paperInterest);
             }
-
+            //对用户兴趣度进行最大最小标准化
             normalizeInterest(paperInterests);
 
             userInterest.setPaperInterests(paperInterests);
@@ -150,7 +152,7 @@ public class UserRecommendServiceImpl implements UserRecommendService {
             Iterator<UserInterest> userInterestIterator=userInterestRepository.findAll().iterator();
             List<UserInterest> userInterests=copyIterator(userInterestIterator);
             iterateSimilarity(userInterests, userInterest, paperInterests, similarities);
-
+            //计算用户与其他用户的相似度
             UserSimilarity userSimilarity=new UserSimilarity(uid);
             userSimilarity.setSimilarities(similarities);
 
@@ -259,20 +261,20 @@ public class UserRecommendServiceImpl implements UserRecommendService {
                 UserInterest userInterest=userInterests.get(i);
                 for(int j=0;j<paperIds.size();j++){
                     double weight=paperRecommendList.get(j).getWeight();
-                    paperRecommendList.get(j).setWeight(weight+userInterest.getPaperInterests().get(j).getInterest()*similarity.getSimilarity());
+                    paperRecommendList.get(j).setWeight(weight+(userInterest.getPaperInterests().get(j).getInterest()*similarity.getSimilarity()));
                 }
             }
-            //把权重为0的推荐论文过滤掉
+            //把权重小于推荐阈值的推荐论文过滤掉
             paperRecommendList.sort(Comparator.comparing(PaperRecommend::getWeight).reversed());
 
-            int zero_idx=paperRecommendList.size();
+            int threshold_idx=paperRecommendList.size();
             for(int i=0;i<paperRecommendList.size();i++){
-                if(paperRecommendList.get(i).getWeight().equals(0.0)){
-                    zero_idx=i;
+                if(paperRecommendList.get(i).getWeight()<THRESHOLD_WEIGHT){
+                    threshold_idx=i;
                     break;
                 }
             }
-            paperRecommendList=paperRecommendList.subList(0,zero_idx);
+            paperRecommendList=paperRecommendList.subList(0,threshold_idx);
 
             //过滤掉用户已经产生收藏和点击行为的论文
             List<PaperCollection> paperCollections=userActionRepository.findById(uid.longValue()).get().getPaperCollections();
@@ -336,6 +338,7 @@ public class UserRecommendServiceImpl implements UserRecommendService {
         Optional<UserRecommend> userRecommendOptional=userRecommendRepository.findById(uid.longValue());
         if(userRecommendOptional.isPresent()){
             List<PaperRecommend> paperRecommends=userRecommendOptional.get().getPaperRecommendList();
+            System.out.println("协同过滤推荐数量:"+paperRecommends.size());
             if(paperRecommends.size()>n){
                 paperRecommends=paperRecommends.subList(0,n);
             }
@@ -370,6 +373,18 @@ public class UserRecommendServiceImpl implements UserRecommendService {
             papers.add(paperRepository.findById(paperId).get());
         }
         return papers;
+    }
+
+    @Override
+    public Double countAverage(Integer begin_uid, Integer end_uid) {
+        double sum=0.0;
+        for(Integer uid=begin_uid;uid<=end_uid;uid++){
+            Optional<UserRecommend> userRecommendOptional=userRecommendRepository.findById(uid.longValue());
+            if(userRecommendOptional.isPresent()){
+                sum+=userRecommendOptional.get().getPaperRecommendList().size();
+            }
+        }
+        return sum/(end_uid-begin_uid+1);
     }
 
 
@@ -416,7 +431,6 @@ public class UserRecommendServiceImpl implements UserRecommendService {
         double res=doubleRemain(countInterest(clickAction)+countInterest(paperCollection),4);
         return res;
     }
-
     //计算点击事件贡献的兴趣度
     // ln(click+1) * 2 ^ (-(1/3)(Tc-Tl))
     private Double countInterest(ClickAction clickAction){
@@ -430,6 +444,7 @@ public class UserRecommendServiceImpl implements UserRecommendService {
     }
 
     //计算收藏论文贡献的兴趣度
+    //2*2^(-(1/5)(Tc-Tl))
     private Double countInterest(PaperCollection paperCollection){
         Long lastTime= paperCollection.getLastTime();
         Long currentTime=new Date().getTime();
@@ -448,7 +463,6 @@ public class UserRecommendServiceImpl implements UserRecommendService {
         int size_1=paperInterests_1.size(),size_2=paperInterests_2.size();
         double up_sum=0.0;
         double pow_sum_1=0.0,pow_sum_2=0.0;
-
         while(index_1<size_1&&index_2<size_2){
             PaperInterest paperInterest_1=paperInterests_1.get(index_1);
             PaperInterest paperInterest_2=paperInterests_2.get(index_2);
