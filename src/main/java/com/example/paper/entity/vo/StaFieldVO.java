@@ -110,4 +110,28 @@ public class StaFieldVO {
     @Field(type = FieldType.Integer)
     private Integer heat;
 
+    public Long[] getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(Long[] authors) {
+        this.authors = authors;
+    }
+
+    @Field(type = FieldType.Text)
+    private Long[] authors;
+
+    public List<StaAuthorVO> getAuthorDetail() {
+        return authorDetail;
+    }
+
+    public void setAuthorDetail(List<StaAuthorVO> authorDetail) {
+        this.authorDetail = authorDetail;
+    }
+
+    @Field(type = FieldType.Text)
+    private List<StaAuthorVO> authorDetail;
+
+
+
 }

@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -143,7 +144,26 @@ public class StatisticServiceImpl implements StatisticService {
                     break;
                 }
             }
+            papers.sort(new Comparator<Paper>() {
+                @Override
+                public int compare(Paper o1, Paper o2) {
+                    return o2.getN_citation()-o1.getN_citation();
+                }
+            });
             staFieldVO.setPaperDetail(papers);
+            List<StaAuthorVO> authorDetail=new ArrayList<>();
+            for(Long authorId: staFieldVO.getAuthors()){
+                Optional<StaAuthorVO> author_opt = staAuthorRepository.findById(authorId);
+                author_opt.ifPresent(authorDetail::add);
+
+            }
+            authorDetail.sort(new Comparator<StaAuthorVO>() {
+                @Override
+                public int compare(StaAuthorVO o1, StaAuthorVO o2) {
+                    return o2.getHeat()-o1.getHeat();
+                }
+            });
+            staFieldVO.setAuthorDetail(authorDetail);
         }
         return staFieldVO;
     }
